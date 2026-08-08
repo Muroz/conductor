@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kubectl get:*)",
+      "Bash(kubectl describe:*)",
+      "Bash(kubectl logs:*)",
+      "Bash(kubectl explain:*)",
+      "Bash(kubectl api-resources:*)",
+      "Bash(kubectl config get-contexts:*)",
+      "Bash(kubectl config current-context:*)",
+      "Bash(kubectl diff:*)",
+      "Bash(kubectl kustomize:*)",
+      "Bash(kind get:*)",
+      "Bash(helm template:*)",
+      "Bash(helm show:*)",
+      "Bash(helm search:*)",
+      "Bash(argocd app get:*)",
+      "Bash(argocd app list:*)",
+      "Bash(argocd app diff:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker images:*)",
+      "Bash(docker compose ps:*)",
+      "Bash(docker compose logs:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(alembic history:*)",
+      "Bash(alembic current:*)",
+      "Bash(alembic show:*)"
+    ]
+  }
+}
