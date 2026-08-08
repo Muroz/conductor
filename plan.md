@@ -75,6 +75,17 @@ Set up `kind` with an ingress controller and a local image registry. Write a `Ma
 
 **Learn:** kind config (port mappings, multi-node), why `kubectl` context matters, how images get into a kind cluster (`kind load` vs. local registry).
 
+#### Tooling to install here
+
+`kind`, `kubectl`, `helm`, and the `argocd` CLI are load-bearing — the milestones don't work without them. Two more are worth installing even though nothing strictly requires them, because most of what this project teaches is learned by *watching cluster state change*, and plain `kubectl` is a poor instrument for that:
+
+| Tool | Why it earns its place |
+|---|---|
+| **k9s** | A live terminal UI over the cluster. `kubectl get pods` samples state at one instant; the lessons are in the *transitions* — `Pending → ContainerCreating → Running`, a rolling update replacing pods one at a time, `CrashLoopBackOff` backing off at increasing intervals. Polling with `kubectl get -w` makes you miss them. Pays for itself in M2 (delete a pod, watch it return), M3 (migration Job completes, *then* pods roll), M11 (2 → 10 replicas and back), and M13, where every drill is a state transition. |
+| **stern** | Tails logs from many pods at once with color-coded prefixes, and picks up new pods as they appear. M2's own gate — *"scale workers to 5 and confirm no job is processed twice"* — is not checkable without reading five workers' logs interleaved. `kubectl logs` gives you one pod at a time. Same story in M11 (autoscaled pods arrive mid-tail) and M12 (old and new code both logging during a rolling update). |
+
+> **Caveat from M4 onward:** k9s makes it a single keystroke to edit or delete a live resource. That violates the git-only rule below. Treat it as read-only once ArgoCD is in charge — use it to *watch*, never to *fix*.
+
 > **Done when:** `make down && make up` gets you from nothing to a working cluster with ingress in under 3 minutes, and you've done it at least twice without editing anything by hand.
 
 ---
