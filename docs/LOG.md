@@ -1,21 +1,21 @@
 # Engineering log
 
-One entry per working session, dated, newest at the bottom. Written at `/m-close`, from
-`docs/predictions/MN.md` and what actually happened.
+One entry per working session, dated, newest at the bottom. Written at `/m-close`.
 
-The **What I had wrong** section is the point of this file. A run of entries with nothing
-there means the predictions have gone vague — fix the predictions, not the log.
+**What broke** and **What surprised me** are the point of this file. A run of entries with
+nothing in them means the milestones are being followed without being understood — that's a
+signal to fix, not a clean record.
 
 Entry format:
 
 ```markdown
 ## YYYY-MM-DD — MN: <milestone title>
 
-**Predicted:** …
+**Built:** …
 
-**Actually happened:** …
+**What broke, and what actually caused it:** …
 
-**What I had wrong:** …
+**What surprised me:** …
 
 **Worth remembering:** …
 ```

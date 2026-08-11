@@ -16,12 +16,31 @@ A milestone finished quickly that they can't explain is a failed milestone.
 ## The milestone loop
 
 ```
-1. /m-start N   →  you write concept notes only. No code.
-2. human        →  writes docs/predictions/MN.md
+1. /m-start N   →  you write the walkthrough, concept notes, lexicon entries. No code.
+2. human        →  reads them and asks whatever is unclear. This is the learning.
 3. you          →  plan mode → ExitPlanMode → implement milestone N only
-4. human        →  reviews the diff, then runs the "done when" themselves
-5. /m-close N   →  you grill them, they log deltas, commit
+4. human        →  reviews the diff against the walkthrough, then runs the "done when"
+5. /m-close N   →  you grill them, log what broke and why, commit
 ```
+
+**You implement; the human reviews.** They may build parts themselves and hand them to you to
+critique — that's fine — but the default is that step 3 is yours. Never leave it ambiguous
+who is holding the keyboard.
+
+## The three documents
+
+Every milestone produces these before any code exists. `/m-start` writes them.
+
+- **`docs/walkthroughs/MN.md`** — what gets built, in what order, and why. Opens with a plain
+  table of the files the milestone delivers, and an explicit list of what it does *not*
+  include. This is what the human reads your diff against.
+- **`docs/concepts/MN-<topic>.md`** — the mental models. Why the design is this way, and what
+  failure mode motivated it.
+- **`docs/lexicon.md`** — one cumulative glossary, appended per milestone, one plain sentence
+  per term.
+
+If implementation diverges from the walkthrough, update the walkthrough in the same commit.
+It has to describe what exists, not what was planned.
 
 ## Hard rules
 
@@ -38,10 +57,17 @@ You *may* run commands needed to build or debug your own implementation. The lin
 whether the command's output is the thing the human is supposed to observe and interpret.
 When in doubt, ask.
 
-**Never write `docs/predictions/`.** That directory is the human's prior, recorded before
-they see your implementation. You may write the *prompts* (`/m-start` does this); never the
-answers. If asked to fill one in mid-milestone, decline — it destroys the only measurement
-this project has.
+**Never cite a reference you haven't checked in this session.** Fetch the page, the release
+tag, the manifest, and confirm it says what you think it says. Every reference you write
+carries its URL, the version or tag pinned, and `checked: YYYY-MM-DD`. Point at the exact page
+or file, never a doc-site landing page.
+
+Tools move faster than your training data. Sending the human to a page that no longer contains
+what you claimed costs an hour and a lot of trust — it has already happened once in this repo.
+
+**When upstream now recommends something different from what this project does, say so.**
+Name what they recommend, what we do, and the concrete reason we differ. Silent divergence
+means the human reads the official docs and finds them contradicting their own repo.
 
 **Scope to one milestone.** Do not implement ahead, not even a small piece that's "obviously
 needed later." If milestone N genuinely requires something from milestone N+2, stop and say
@@ -79,6 +105,20 @@ ones per milestone beat a dozen trivial ones.
 **Write concept notes for understanding, not reference.** `docs/concepts/` should explain
 mental models and *why the design is the way it is*, with the failure mode that motivated it.
 Don't restate the official docs; link to them.
+
+**Write in plain English.** The reader knows how to program and does not know Kubernetes.
+Assume nothing beyond the previous milestones' notes.
+
+- Define every term the first time you use it, in one sentence, inline — then add it to
+  `docs/lexicon.md`. A term used in a note but missing from the lexicon is a bug.
+- Lead with the plain answer, then elaborate. Not the other way round.
+- Short sentences, one idea each. Don't stack three clauses with dashes and semicolons.
+- Cut the flourishes: "worth being able to draw from memory", "the whole subject of", "the
+  interesting trap here". Say the thing.
+- Concrete over clever. "A Service gives a stable address to a set of pods that keep being
+  replaced" beats "a Service is an abstraction over pod lifecycle".
+
+If someone has to ask "what is a manifest?" after reading a note, the note failed.
 
 ## What the human writes, not you
 
