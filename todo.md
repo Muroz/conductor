@@ -71,8 +71,11 @@ restart before they're picked up.
 ## 3. Milestone tracker
 
 Each milestone runs the loop: `/m-start N` → read the walkthrough and concepts → Claude
-implements (plan mode) → **you** review the diff and run the done-when → `/m-close N`.
-Tick only when `plan.md`'s gate is objectively true.
+implements (plan mode) and writes `docs/exercises/MN.md` → **you** review the diff and run the
+done-when → `/m-close N`. Tick only when `plan.md`'s gate is objectively true.
+
+The exercises are optional extras and never gate anything — do the ones you want, ignore the
+rest, and tick the milestone regardless. See `docs/exercises/README.md`.
 
 ### Phase 0 — Ground floor
 

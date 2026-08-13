@@ -19,8 +19,9 @@ A milestone finished quickly that they can't explain is a failed milestone.
 1. /m-start N   →  you write the walkthrough, concept notes, lexicon entries. No code.
 2. human        →  reads them and asks whatever is unclear. This is the learning.
 3. you          →  plan mode → ExitPlanMode → implement milestone N only
-4. human        →  reviews the diff against the walkthrough, then runs the "done when"
-5. /m-close N   →  you grill them, log what broke and why, commit
+4. you          →  write docs/exercises/MN.md, then say it's ready and stop
+5. human        →  reviews the diff against the walkthrough, then runs the "done when"
+6. /m-close N   →  you grill them, log what broke and why, commit
 ```
 
 **You implement; the human reviews.** They may build parts themselves and hand them to you to
@@ -42,6 +43,16 @@ Every milestone produces these before any code exists. `/m-start` writes them.
 If implementation diverges from the walkthrough, update the walkthrough in the same commit.
 It has to describe what exists, not what was planned.
 
+## The fourth document, written later
+
+**`docs/exercises/MN.md`** — optional hands-on exercises. Written at step 4, once the code
+exists, because before that there are no real files or running cluster to point at. `/m-start`
+never writes it. `/m-close` may append a `## From the grill` section where the grill exposed
+a boundary.
+
+These are **extras**. They never gate a milestone, never appear in a "done when", and a
+milestone closes with every box unticked. See `docs/exercises/README.md`.
+
 ## Hard rules
 
 **Never run a milestone's "done when" verification.** Not partially, not "just to check my
@@ -56,6 +67,10 @@ running PromQL in the Prometheus UI, confirming an alert fired and routed.
 You *may* run commands needed to build or debug your own implementation. The line is
 whether the command's output is the thing the human is supposed to observe and interpret.
 When in doubt, ask.
+
+**The same goes for exercises in `docs/exercises/`.** Never do one for them, never run one to
+see how it turns out, never write down what the output will be. The value is entirely in their
+hands on the keyboard. If asked to run one, decline and hand it back.
 
 **Never cite a reference you haven't checked in this session.** Fetch the page, the release
 tag, the manifest, and confirm it says what you think it says. Every reference you write
@@ -124,6 +139,25 @@ ones per milestone beat a dozen trivial ones.
 **Write concept notes for understanding, not reference.** `docs/concepts/` should explain
 mental models and *why the design is the way it is*, with the failure mode that motivated it.
 Don't restate the official docs; link to them.
+
+**Write exercises as a goal, not a script.** `docs/exercises/MN.md`, written at step 4 of the
+loop. Each entry is a goal plus at most two collapsed hints — hint 1 points at the area, hint 2
+may name a command. Working out what to look at is most of the skill; a checklist they can
+follow without thinking teaches nothing.
+
+- **Phrase the goal as something they should be able to explain afterwards**, from evidence
+  they gathered. That is how they self-assess, because there is no answer key.
+- **Never write the expected output.** You cannot run their cluster, so "you will see X" is an
+  unverified assertion. It is also how `docs/predictions/` failed and got deleted.
+- **Size each one well under the implementation** — one field, one command, one observation.
+  Every exercise states how to undo it; `make reset` is the backstop.
+- **One or two per distinct topic**, tied to that milestone's concept notes. A topic with no
+  experiment worth doing gets none. Padding is worse than absence.
+- **The test is whether doing it could surprise them.** If not, cut it.
+- **M13 gets no exercises file.** That milestone *is* six failure drills the human runs by
+  hand; a parallel set would be duplication. `/m-close 13` may still append from the grill.
+- **From M4 on, exercises obey the git-only rule too**: read-only, or commit-and-revert with
+  Argo doing the sync. Never an exercise that says `kubectl edit`.
 
 **Write in plain English.** The reader knows how to program and does not know Kubernetes.
 Assume nothing beyond the previous milestones' notes.

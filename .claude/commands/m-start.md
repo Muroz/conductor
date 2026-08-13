@@ -143,6 +143,9 @@ If a sentence needs a term the reader doesn't have yet, define the term or cut t
   a few lines are implementation — that's the next session, in plan mode.
 - **One milestone.** Nothing about M$1+1, except in "What's not in this milestone".
 - **Don't run the "done when".** Not to check your own reasoning, not partially.
+- **Don't write `docs/exercises/M$1.md`.** That comes at step 4 of the loop, once the code
+  exists — before then there are no real files or running cluster to point at, which is
+  exactly how `docs/predictions/` failed.
 
 ## Then stop
 

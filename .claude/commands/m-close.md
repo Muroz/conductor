@@ -1,5 +1,5 @@
 ---
-description: Close milestone N — confirm the gate, grill, log what broke, commit
+description: Close milestone N — confirm the gate, grill, add exercises, log what broke, commit
 argument-hint: <milestone number, e.g. 3>
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 ---
@@ -44,7 +44,23 @@ ordering, and what happens when it doesn't.
 
 Any term that comes up in the grill and isn't in `docs/lexicon.md` gets added.
 
-## 4. Log it
+## 4. Turn what the grill exposed into exercises
+
+Where the grill found a boundary — an answer that was wrong, thin, or "I don't know" — and
+there is a hands-on experiment that would settle it, append it to `docs/exercises/M$1.md`
+under a `## From the grill` heading.
+
+This is remediation, not coverage. **If they answered everything cleanly, append nothing** and
+say so. Padding this section is how the file becomes wallpaper.
+
+Same rules as the rest of that file, from `CLAUDE.md`: a goal and at most two collapsed hints,
+no command list, no expected output, an undo, and small. Explaining the answer during the
+grill does not remove the value of them doing it — the exercise is where it sticks.
+
+If M$1 has no exercises file because nothing in it was worth an experiment, create one now
+only if the grill produced something. Never for the sake of the heading.
+
+## 5. Log it
 
 Append a dated entry to `docs/LOG.md` (newest at the bottom):
 
@@ -66,7 +82,11 @@ anything the grill exposed>
 plainly — either the milestone was too easy or it was followed without being understood. Don't
 pad them.
 
-## 5. Commit
+If they did any exercises and one came out differently than they expected, that belongs in
+**What surprised me** — it is the same kind of evidence as a failed gate, and it is the only
+place the exercises leave a trace.
+
+## 6. Commit
 
 Stage the milestone's work and commit. Subject names the milestone and the gate it passed:
 
