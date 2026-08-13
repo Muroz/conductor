@@ -76,7 +76,7 @@ Tick only when `plan.md`'s gate is objectively true.
 
 ### Phase 0 — Ground floor
 
-- [ ] **M0** One-command reproducible cluster
+- [x] **M0** One-command reproducible cluster
 - [ ] **M1** The app, no Kubernetes at all
 - [ ] **M2** Deploy it by hand, with raw YAML
 - [ ] **M3** ⭐ Migrations as a first-class Kubernetes citizen

@@ -1,0 +1,123 @@
+# The cluster definition for Conductor's local kind cluster.
+#
+# Read ONCE, by `kind create cluster --config kind/cluster.yaml`. Editing this file does
+# nothing to a running cluster — no error, no warning, it just keeps the config it was born
+# with. Any change here means `make down && make up`.
+#
+# See docs/concepts/M0-kind-cluster-anatomy.md
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+
+# Decides the node container names (conductor-control-plane, conductor-worker, ...) and the
+# kubectl context name (kind-conductor). Without it, kind names everything "kind", which is
+# fine until you have two clusters. The Makefile passes --name too; they must agree.
+name: conductor
+
+# NOTE: no `containerdConfigPatches` block here.
+#
+# kind's local-registry script sets containerd's `config_path = "/etc/containerd/certs.d"`
+# via this field. Its own comment says that patch "is not necessary with images from kind
+# v0.27.0+", and the node image below is published by kind v0.32.0. So scripts/registry.sh
+# writes hosts.toml into a directory containerd already reads.
+#   https://kind.sigs.k8s.io/docs/user/local-registry/ (checked 2026-08-11)
+# If a pod ever fails to pull from localhost:5001 while `docker push` works, adding this
+# block back is the first thing to try:
+#   containerdConfigPatches:
+#   - |-
+#     [plugins."io.containerd.grpc.v1.cri".registry]
+#       config_path = "/etc/containerd/certs.d"
+
+nodes:
+
+# ---------------------------------------------------------------------------------------
+# The control-plane node: runs the API server, scheduler, controller manager and etcd.
+# It is also the ONLY node with host port mappings, which is why the ingress controller is
+# pinned to it (see the `labels` field below).
+# ---------------------------------------------------------------------------------------
+- role: control-plane
+
+  # The Kubernetes version comes from the node image, pinned by digest.
+  #
+  # Two reasons this is not kind v0.32.0's default (v1.36.1):
+  #   1. Reproducibility. Without `image:`, the Kubernetes version silently changes the next
+  #      time kind is upgraded. This is the reproducible-cluster milestone.
+  #   2. Version skew. kubectl on this machine is v1.34.1 (Docker Desktop ships one in
+  #      /usr/local/bin, which beats Homebrew's on PATH). Kubernetes supports a client/server
+  #      skew of one minor version either way. v1.34 client against a v1.36 server is two
+  #      ahead and unsupported; v1.35 is not.
+  #
+  # The @sha256 digest is not decoration — kind's v0.32.0 release notes say you *must* use it
+  # to be sure of getting an image built for this kind release. A tag can be moved; a digest
+  # is the content.
+  #   https://github.com/kubernetes-sigs/kind/releases/tag/v0.32.0 (checked 2026-08-11)
+  image: kindest/node:v1.35.5@sha256:ce977ae6d65918d0b58a5f8b5e940429c2ce42fa3a5619ec2bbc60b949c0ac95
+
+  # TODO(learn): three nodes, and we re-add a label upstream deleted.
+  #
+  # The ingress-nginx kind manifest used to carry `nodeSelector: ingress-ready: "true"` — it
+  # is present at tag controller-v1.12.0 and gone by controller-v1.13.9. Today the controller
+  # pod selects only `kubernetes.io/os: linux` and merely *tolerates* the control-plane taint.
+  # Tolerating a taint permits scheduling there; it does not require it.
+  #
+  # On a single-node cluster that distinction never shows: there is one node, so the pod goes
+  # there and the upstream manifest works unmodified. On this three-node cluster the scheduler
+  # may put the controller on a worker — a node with no port mapping — and then every pod
+  # reads Running while `curl localhost` gets connection refused. Nothing is wrong from
+  # Kubernetes' point of view, so nothing reports an error.
+  #
+  # So: label the node here, and add the matching nodeSelector to the vendored manifest
+  # (k8s/ingress-nginx/deploy-v1.15.1.yaml). Two files that must agree — which is the cost.
+  #
+  # The defensible alternative is a single-node cluster with the manifest untouched: simpler,
+  # faster to create, closer to upstream. It costs you ever seeing a pod land on the wrong
+  # node, and `kind load` copying to three nodes (which you will feel in M1). plan.md puts
+  # multi-node in M0's syllabus, so we pay for it. If `make up` misses the 3-minute gate,
+  # this is the first decision to reverse.
+  #
+  # See docs/concepts/M0-ingress.md#the-controller-has-to-land-on-the-right-node
+  labels:
+    ingress-ready: "true"
+
+  # A node is a Docker container. A process listening on port 80 inside it is NOT listening on
+  # port 80 on the host. extraPortMappings is `docker run -p`, declared here.
+  #
+  # The mapping belongs to THIS node, not to the cluster. And two nodes cannot both map host
+  # port 80 — Docker refuses the second bind — so "put it on every node" is not a fix.
+  #
+  # TODO(learn): host ports 80/443, bound to loopback only.
+  #
+  # Port 80 means the ingress check is `curl http://localhost/foo` with no port number. The
+  # alternative is 8080/8443, which cannot collide with anything else on the machine; the cost
+  # is typing the port into every URL for the rest of the project. Port 80 was free here
+  # (checked before implementing). If it is ever taken, the symptom is `kind create cluster`
+  # failing partway with a Docker `bind: address already in use` and leaving a half-created
+  # cluster behind — `make reset` clears that.
+  #
+  # listenAddress defaults to 0.0.0.0, i.e. every interface, which publishes a dev cluster to
+  # whatever network you are joined to. 127.0.0.1 restricts it to this machine and costs
+  # nothing.
+  extraPortMappings:
+  - containerPort: 80          # port on the node
+    hostPort: 80               # port on this laptop
+    listenAddress: "127.0.0.1" # not the 0.0.0.0 default; loopback only
+    protocol: TCP              # the default, stated so the field is not a mystery later
+  - containerPort: 443
+    hostPort: 443
+    listenAddress: "127.0.0.1"
+    protocol: TCP
+
+# ---------------------------------------------------------------------------------------
+# Two worker nodes: they run workloads and nothing else. No port mappings, so nothing that
+# needs to be reachable from the host can live here.
+#
+# They exist so that scheduling is a real question rather than a foregone conclusion —
+# nodeSelector, affinity and DaemonSets are all meaningless on a one-node cluster, and M2
+# asks you to explain every field you write.
+#
+# The image is pinned on every node for the same reason as above; kind does not inherit it.
+# ---------------------------------------------------------------------------------------
+- role: worker
+  image: kindest/node:v1.35.5@sha256:ce977ae6d65918d0b58a5f8b5e940429c2ce42fa3a5619ec2bbc60b949c0ac95
+- role: worker
+  image: kindest/node:v1.35.5@sha256:ce977ae6d65918d0b58a5f8b5e940429c2ce42fa3a5619ec2bbc60b949c0ac95

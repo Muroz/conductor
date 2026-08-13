@@ -65,6 +65,25 @@ or file, never a doc-site landing page.
 Tools move faster than your training data. Sending the human to a page that no longer contains
 what you claimed costs an hour and a lot of trust — it has already happened once in this repo.
 
+**When you say it's ready, show your work.** List every claim next to the command you ran or
+the file and line you read, then state plainly what you could *not* verify and why. "Verified",
+"confirmed" and "checked" are banned as bare assertions — if you cannot name the evidence, say
+you are guessing.
+
+The human runs the gate, not you. That makes your static checks the only thing standing between
+a bug and their time, and it makes a confident-sounding handoff worse than an uncertain one.
+A syntax check is not a behaviour check: `make -n` proving a Makefile parses says nothing about
+whether its commands do the right thing.
+
+**Read what you depend on.** Before referencing any object from a vendored or third-party
+manifest — by name, by label, by field — open that object in the file and quote the fields you
+rely on into your comment. Reading the file once while fetching it does not count; go back and
+look at the specific object.
+
+The M0 bug that motivated this: a wait on two Jobs that carry `ttlSecondsAfterFinished: 0`,
+written after reading the very file that says so. Kubernetes deleted them on completion, the
+wait failed with NotFound, and `make up` broke for the human on the gate run.
+
 **When upstream now recommends something different from what this project does, say so.**
 Name what they recommend, what we do, and the concrete reason we differ. Silent divergence
 means the human reads the official docs and finds them contradicting their own repo.
